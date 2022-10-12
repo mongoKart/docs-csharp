@@ -156,7 +156,7 @@ you configure the following properties:
          for more information on schema validation.
 
    * - ``Collation``
-     - | Specifies the type of language collation to use when sorting
+     - | Specifies the kind of language collation to use when sorting
          results. See :manual:`the MongoDB server manual</reference/collation/#std-label-collation>`
          for more information on collation.
 
@@ -183,7 +183,7 @@ you configure the following properties:
 
 .. tip::
 
-    The ``UpdateOptions`` parameter is optional. Use it only if you need to change the
+    The ``UpdateOptions`` parameter is optional. Use it only if you must change the
     default update behavior.
 
 Example
