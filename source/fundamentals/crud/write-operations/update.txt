@@ -43,8 +43,8 @@ You can perform update operations in MongoDB with the following methods:
 - ``UpdateOne()``, which updates *the first document* that matches the query filter.
 - ``UpdateMany()``, which updates *all documents* that match the query filter.
 
-Construct Required Arguments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Required Parameters
+~~~~~~~~~~~~~~~~~~~
 
 Update operations require two parameters: 
 
@@ -127,8 +127,8 @@ update all matched documents.
 
 .. tip::
 
-   Find runnable examples using these methods under :ref:`additional
-   information <additional-info>`.
+   Find runnable examples that use these methods under :ref:`Additional
+   Information <csharp-update-info>`.
 
 Customize the Update Operation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,6 +186,38 @@ you configure the following properties:
     The ``UpdateOptions`` parameter is optional. Use it only if you must change the
     default update behavior.
 
+Return Value
+~~~~~~~~~~~~
+
+The ``UpdateOne()`` and ``UpdateMany()`` methods each return an ``UpdateResult`` 
+object. The ``UpdateResult`` type contains the following properties:
+
+.. list-table::
+   :widths: 30 70
+   :header-rows: 1
+
+   * - Property
+     - Description
+
+   * - ``IsAcknowledged``
+     - | Indicates whether the update operation was acknowledged by MongoDB.
+
+   * - ``IsModifiedCountAvailable``
+     - | Indicates whether you can read the count of updated records on the
+         ``UpdateResult``.
+
+   * - ``MatchedCount``
+     - | The number of documents that matched the query filter, regardless of
+         how many were updated.
+
+   * - ``ModifiedCount``
+     - | The number of documents updated by the update operation. If an updated
+         document is identical to the original, it won't be included in this count.
+
+   * - ``UpsertedId``
+     - | The ID of the document that was upserted in the database, if the driver
+         performed an upsert.
+
 Example
 ~~~~~~~
 
@@ -230,39 +262,7 @@ value in these documents to "Manhattan (north)":
    ``UpdateMany()``, the driver would update only the first of the
    matched documents.
 
-Return Value
-~~~~~~~~~~~~
-
-The ``UpdateOne()`` and ``UpdateMany()`` methods each return an ``UpdateResult`` 
-object. The ``UpdateResult`` type contains the following properties:
-
-.. list-table::
-   :widths: 30 70
-   :header-rows: 1
-
-   * - Property
-     - Description
-
-   * - ``IsAcknowledged``
-     - | Indicates whether the update operation was acknowledged by MongoDB.
-
-   * - ``IsModifiedCountAvailable``
-     - | Indicates whether you can read the count of updated records on the
-         ``UpdateResult``.
-
-   * - ``MatchedCount``
-     - | The number of documents that matched the query filter, regardless of
-         how many were updated.
-
-   * - ``ModifiedCount``
-     - | The number of documents updated by the update operation. If an updated
-         document is identical to the original, it won't be included in this count.
-
-   * - ``UpsertedId``
-     - | The ID of the document that was upserted in the database, if the driver
-         performed an upsert.
-
-.. _additional-info:
+.. _csharp-update-info:
 
 Additional Information
 ----------------------
