@@ -1,5 +1,6 @@
 .. _csharp-serialize-bson:
 
+
 ==============
 Serialize BSON
 ==============
@@ -16,65 +17,101 @@ Overview
 --------
 
 In the {+driver-long+}, **:wikipedia:`serialization <Serialization>`** is the process of 
-mapping a {+language+} object to a BSON document.
-Reading and Writing BSON/JSON demonstrates how to manually read and write BSON and JSON. However, using the serialization classes make this process much easier.
+mapping a {+language+} object to a BSON document. Reading and Writing BSON/JSON 
+demonstrates how to manually read and write BSON and JSON. However, using the 
+serialization classes make this process much easier.
 
-Serializer Registry
-The serializer registry contains all the IBsonSerializers that have been registered. It can be accessed via the SerializerRegistry property of the static class BsonSerializer.
 
-NOTE
-This is a global registry. Currently, you cannot use multiple registries in a single application.
-Serialization Provider
-The serializer registry is powered by a list of IBsonSerializationProvider. A serialization provider allows you to provide serializers on demand. The provider should be registered as soon as possible to ensure that the serializers provided are used. You can delegate handling of any types your custom provider isn’t prepared to handle by returning null from GetSerializer.
+Create a Serializer
+-------------------
 
-Implementation
-To implement an IBsonSerializationProvider, create a class that implements the interface and register it using the RegisterSerializationProvider method.
+There are many serializers already built for handling primitive types, collection types, 
+and custom classes. 
 
-class MyProvider : IBsonSerializationProvider
-{
-    public IBsonSerializer GetSerializer(Type type)
-    {
-        if (type == typeof(int))
-        {
-            return new MyInt32Serializer();
-        }        
+The following code sample shows how to use ``BsonDocumentSerializer`` to read a BSON 
+file into a ``BsonDocument`` object:
 
-        return null;
-    }
-}
-Above, we have a custom implemention of a serializer for an Int32. If the type being requested is for an Int32, we return our serializer. Otherwise, we return null to let the next IBsonSerializationProvider in line handle the request.
+string inputFileName = "myFile.bson";
 
-Serializers
-IBsonSerializer is the main interface that is used to handle translating complex types. There are many serializers already built for handling primitive types, collection types, and custom classes.
-
-For example, to read a file containing the JSON { a: 1, b: [{ c: 1 }] } into a BsonDocument, use the BsonDocumentSerializer:
-
-var jsonString = "{ a: 1, b: [{ c: 1 }] }";
-using (var reader = new JsonReader(jsonString))
+using (var stream = File.OpenRead(inputFileName))
+using (var reader = new BsonReader(inputFileName))
 {
     var context = BsonDeserializationContext.CreateRoot(reader);
     BsonDocument doc = BsonDocumentSerializer.Instance.Deserialize(context);
-}
-Implementation
-WARNING
-Writing custom serializers to handle both normal cases and edge cases can be very tricky.
-To implement a custom IBsonSerializer, it is best to inherit from SerializerBase<T> and override the Deserialize and Serialize methods.
 
-For example, it implement a serializer that reads an Int32:
+Serializer Registry
+The serializer registry contains all the IBsonSerializers that have been registered. 
+It can be accessed via the SerializerRegistry property of the static class BsonSerializer.
+
+.. note::
+   The serializer registry is global. You can't use multiple serializer registries in a 
+   single application.
+
+
+Serialization Provider
+
+The serializer registry is backed by a list of IBsonSerializationProvider objects. 
+A **serialization provider** is an object that returns a serializer, allowing you to
+provide serializers on demand. 
+
+You must register a serialization provider before you can use it.
+
+Implementation
+--------------
+
+To create a serialization provider, define a class that implements the 
+``IBsonSerializationProvider`` interface. This interface requires
+one method, ``GetSerializer``, that returns a serializer for every type you're able
+to handle and ``null`` for any type your provider isn't prepared to handle. 
+
+The following code sample shows one way to implement ``IBsonSerializationProvider``.
+If the ``type`` parameter is an ``int`` (the type to be serializer is an integer),
+the ``GetSerializer`` method returns an instance of ``MyInt32Serializer``. If ``type``
+is any other type, the method returns ``null`` and the next ``IBsonSerializationProvider``
+handles the request. 
+
+.. code-block:: csharp
+    
+   class MyProvider : IBsonSerializationProvider
+   {
+       public IBsonSerializer GetSerializer(Type type)
+       {
+           if (type == typeof(int))
+           {
+               return new MyInt32Serializer();
+           }        
+
+           return null;
+       }
+   }
+
+}
+
+Implementation
+
+.. warning::
+   Writing custom serializers to handle both normal cases and edge cases can be 
+   tricky.
+
+To create a custom serializer to handle a complex type, define a class that implements 
+the ``IBsonSerializer`` interface. It is simplest to inherit from ``SerializerBase<T>``
+and override the ``Serialize`` and ``Deserialize`` methods. 
+
+The following code sample shows how to implement the ``Serialize`` method 
+for the ``int`` type:
 
 class MyInt32Serializer : SerializerBase<int>
 {
-    public override int Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
-    {
-        return context.Reader.ReadInt32();
-    }
-
     public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, int value)
     {
         context.Writer.WriteInt32(value);
     }
 }
-This is overly simplistic. There are other factors that would need to be taken into account such as what happens when the actual BSON type is an Int64. In this case, the below implementation is much better:
+
+The ``Deserialize`` method should take into account other BSON types before reading the
+data. In the case of an ``int``, the value could be an ``Int32``, ``Int64``, ``double``,
+or ``string``. The following code sample shows how to implement the ``Deserialize``
+method to account for these possibilities:
 
 class MyInt32Serializer : SerializerBase<int>
 {
@@ -96,24 +133,23 @@ class MyInt32Serializer : SerializerBase<int>
                 throw new NotSupportedException(message);
         }
     }
-
-    public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, int value)
-    {
-        context.Writer.WriteInt32(value);
-    }
 }
-Notice that we are testing the current BsonType while reading and making decisions. Since some of these conversions could result in an overflow or truncation, exceptions may still be thrown.
 
-NOTE
-The built-in Int32Serializer accounts for this as well as other such items.
+.. warning::
+   Since some of these conversions could result in an overflow or truncation, exceptions 
+   may still be thrown.
 
-You can register your serializer using the RegisterSerializer or implement a serialization provider.
+.. tip::
+   The built-in ``Int32Serializer`` accounts for this as well as other such items.
+
+You can register your serializer using the RegisterSerializer or implement a 
+serialization provider.
 
 Opt-in Interfaces
 There are some opt-in interfaces that allow the driver to utilize your custom serializer in special ways. You should evaluate these interfaces and decide whether your serializer should implement them.
 
 IBsonIdProvider
-If your class is used as a root document, you should implement the IBsonIdProvider interface in order for “Inserting” the document to function best, especially if the class your serializer is for uses an Id type other than ObjectId.
+If your class is used as a root document, you should implement the IBsonIdProvider interface in order for "Inserting" the document to function best, especially if the class your serializer is for uses an Id type other than ObjectId.
 
 IBsonDocumentSerializer
 In order to enable the driver to properly construct type-safe queries using a custom serializer, it needs access to member information. If your custom serializer is for a class, then you should implement IBsonDocumentSerializer.
