@@ -21,23 +21,81 @@ mapping a {+language+} object to a BSON document. Reading and Writing BSON/JSON
 demonstrates how to manually read and write BSON and JSON. However, using the 
 serialization classes make this process much easier.
 
+Use a Serializer
+----------------
+
+The {+driver-short+} includes serializers for primitive types, collection types, 
+and some custom classes. 
+
+The following code sample shows how to use the provided ``BsonDocumentSerializer`` class 
+to read a BSON document from a file into a ``BsonDocument`` object:
+
+.. code-block:: csharp
+
+   string inputFileName = "myFile.bson";
+
+   using (var stream = File.OpenRead(inputFileName))
+   using (var reader = new BsonReader(inputFileName))
+   {
+       var context = BsonDeserializationContext.CreateRoot(reader);
+       BsonDocument doc = BsonDocumentSerializer.Instance.Deserialize(context);
+   }
 
 Create a Serializer
 -------------------
 
-There are many serializers already built for handling primitive types, collection types, 
-and custom classes. 
+.. warning::
+   Because there are often unexpected edge cases to handle, writing custom serializers 
+   can be challenging. 
 
-The following code sample shows how to use ``BsonDocumentSerializer`` to read a BSON 
-file into a ``BsonDocument`` object:
+To create a custom serializer, define a class that inherits from ``SerializerBase<T>``
+and override the ``Serialize`` and ``Deserialize`` methods. 
 
-string inputFileName = "myFile.bson";
+In the following code sample, the ``MyInt32Serializer`` class serializes and deserializes
+``int`` values. The class inherits from ``SerializerBase<int>`` and overrides the 
+``Serialize`` and ``Deserialize`` methods.
 
-using (var stream = File.OpenRead(inputFileName))
-using (var reader = new BsonReader(inputFileName))
-{
-    var context = BsonDeserializationContext.CreateRoot(reader);
-    BsonDocument doc = BsonDocumentSerializer.Instance.Deserialize(context);
+.. code-block:: csharp
+
+    class MyInt32Serializer : SerializerBase<int>
+    {
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, int value)
+        {
+            context.Writer.WriteInt32(value);
+        }
+
+        public override int Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
+        {
+            var type = context.Reader.GetCurrentBsonType();
+            switch (type)
+            {
+                case BsonType.Int32:
+                    return context.Reader.ReadInt32();
+                case BsonType.Int64:
+                    return Convert.ToInt32(context.Reader.ReadInt64());
+                case BsonType.Double:
+                    return Convert.ToInt32(context.Reader.ReadDouble());
+                case BsonType.String:
+                    return int.Parse(context.Reader.ReadString());
+                default:
+                    var message = string.Format("Cannot convert a {0} to an Int32.", type);
+                    throw new NotSupportedException(message);
+            }
+        }
+    }
+
+In the preceding example, the ``Deserialize`` method provides handling for certain 
+data types besides ``Int32``.
+If the value is an ``Int64``, ``double``,
+or ``string``, the method converts the value to an ``Int32`` before deserializing it.
+
+.. warning::
+   Converting one data type to another can cause an overflow or truncation, which may 
+   result in an exception.
+
+.. tip::
+   The ``Deserialize`` method in the built-in ``Int32Serializer`` class performs type 
+   conversation similar to the preceding example.
 
 Serializer Registry
 The serializer registry contains all the IBsonSerializers that have been registered. 
@@ -86,61 +144,6 @@ handles the request.
    }
 
 }
-
-Implementation
-
-.. warning::
-   Writing custom serializers to handle both normal cases and edge cases can be 
-   tricky.
-
-To create a custom serializer to handle a complex type, define a class that implements 
-the ``IBsonSerializer`` interface. It is simplest to inherit from ``SerializerBase<T>``
-and override the ``Serialize`` and ``Deserialize`` methods. 
-
-The following code sample shows how to implement the ``Serialize`` method 
-for the ``int`` type:
-
-class MyInt32Serializer : SerializerBase<int>
-{
-    public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, int value)
-    {
-        context.Writer.WriteInt32(value);
-    }
-}
-
-The ``Deserialize`` method should take into account other BSON types before reading the
-data. In the case of an ``int``, the value could be an ``Int32``, ``Int64``, ``double``,
-or ``string``. The following code sample shows how to implement the ``Deserialize``
-method to account for these possibilities:
-
-class MyInt32Serializer : SerializerBase<int>
-{
-    public override int Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
-    {
-        var type = context.Reader.GetCurrentBsonType();
-        switch (type)
-        {
-            case BsonType.Int32:
-                return context.Reader.ReadInt32();
-            case BsonType.Int64:
-                return Convert.ToInt32(context.Reader.ReadInt64());
-            case BsonType.Double:
-                return Convert.ToInt32(context.Reader.ReadDouble());
-            case BsonType.String:
-                return int.Parse(context.Reader.ReadString());
-            default:
-                var message = string.Format("Cannot convert a {0} to an Int32.", type);
-                throw new NotSupportedException(message);
-        }
-    }
-}
-
-.. warning::
-   Since some of these conversions could result in an overflow or truncation, exceptions 
-   may still be thrown.
-
-.. tip::
-   The built-in ``Int32Serializer`` accounts for this as well as other such items.
 
 You can register your serializer using the RegisterSerializer or implement a 
 serialization provider.
@@ -191,3 +194,13 @@ Above, we are providing information about the members of our class based on the 
 Find(x => x.FirstName == "Jack")
 IBsonArraySerializer
 In the same way, if you have written a custom collection serializer, you should implement IBsonArraySerializer.
+
+- What is a serializer registry?
+- Why do we need one?
+- What is a serialization provider?
+- Why do we need one?
+- When would you create a custom serialization provider?
+- Do we discourage custom serializers?
+- Is there a list of available serializer classes?
+- When would we recommend custom serializers?
+- Is de/serialization a strictly easier version of using a reader/writer?
