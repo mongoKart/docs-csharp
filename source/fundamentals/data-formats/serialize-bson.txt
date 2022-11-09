@@ -195,12 +195,29 @@ Find(x => x.FirstName == "Jack")
 IBsonArraySerializer
 In the same way, if you have written a custom collection serializer, you should implement IBsonArraySerializer.
 
-- What is a serializer registry?
-- Why do we need one?
-- What is a serialization provider?
-- Why do we need one?
-- When would you create a custom serialization provider?
-- Do we discourage custom serializers?
-- Is there a list of available serializer classes?
-- When would we recommend custom serializers?
-- Is de/serialization a strictly easier version of using a reader/writer?
+The serializer registry for the driver is global.
+It's basically a list of available serialization providers for particular types.
+The driver can auto-map types and add them to the registry. When a serialzier is needed,
+the driver walks up the type hierarchy in the registry to find an appropriate provider.
+If you want custom serialization, you can pre-empt the default serializer by 
+manually registering one yourself.
+
+When a serializer is needed for a specific type, the driver checks the registry for a matching provider.
+If one isn't found, it walks through the available providers to find one, then registers
+and caches it.
+
+Custom serializatio is discouraged, but is a kind of escape hatch if none of the 
+built-in serializers work. FOr example, perhaps values for a specific field aren't 
+consistent in the database, in which case the default serializer may not work.
+
+There is no list of availabler serializers, except in the source code.
+
+You would use reader/writer mainly (only?) when creating your own serializer.
+
+Most of the time, default serializers work--you can add class maps/attributes if needed.
+Would do this programmatically only when needed.
+
+First option: Auto-mapping
+Second option: Add attributes to override (e.g., store enum as string)
+Third option: Create Class maps in code
+Fourth option: Define your own Custom Bson Serializer
