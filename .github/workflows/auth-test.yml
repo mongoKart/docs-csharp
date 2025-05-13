@@ -19,7 +19,8 @@ jobs:
         with:
           include_all_old_new_renamed_files: true
           files: |
-            source/**.txt
+            source/**
+            **.txt
       - name: Parse renamed files
         id: renamed-files
         if: steps.changed-files.outputs.renamed_files_count > 0
