@@ -27,16 +27,17 @@ jobs:
         env:
           RENAMED_FILES: ${{ steps.changed-files.outputs.all_old_new_renamed_files }}
         run: |
-          renamed_redirects=""
+          renamed_redirects="<ul>"
           for file in $RENAMED_FILES; do
             old=$(echo "$file" | cut -d',' -f1)
             old="${old#source}"
-            old="${old%.txt}/"
+            old="${old%.txt}"
             new=$(echo "$file" | cut -d',' -f2)
             new="${new#source}"
-            new="${new%.txt}/"
-            renamed_redirects+="- [\\*-master]: \$\{prefix\}/\$\{version\}$old -> \$\{base\}/\$\{version\}$new<br/>"
+            new="${new%.txt}"
+            renamed_redirects+="<li>[\\*-master]: \$\{prefix\}/\$\{version\}$old/ -> \$\{base\}/\$\{version\}$new/</li>"
           done
+          renamed_redirects+="</ul>
           echo "redirects=${renamed_redirects}" >> "$GITHUB_OUTPUT"
       - name: Update the PR Description
         uses: MongoCaleb/pr-description-action@master
