@@ -25,12 +25,11 @@ jobs:
         env:
           RENAMED_FILES: ${{ steps.changed-files.outputs.all_old_new_renamed_files }}
         run: |
-          echo "pwd:"
-          pwd
-          echo "ls:"
-          ls -al
           renamed_redirects=""
           for file in $RENAMED_FILES; do
+            if [[ ! "$file" == *.txt ]]; then
+              continue
+            fi
             old=$(echo "$file" | cut -d',' -f1)
             old="${old#source}"
             old="${old%.txt}"
@@ -49,6 +48,9 @@ jobs:
         run: |
           deleted_redirects=""
           for file in $DELETED_FILES; do
+            if [[ ! "$file" == *.txt ]]; then
+              continue
+            fi
             old=$(echo "$file" | cut -d',' -f1)
             old="${old#source}"
             old="${old%.txt}"
