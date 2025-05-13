@@ -1,4 +1,4 @@
-name: Redirector
+name: Add Redirects
 on:
   pull_request_target:
 jobs:
@@ -6,10 +6,7 @@ jobs:
     name: Get Redirects for Modified Files
     runs-on: ubuntu-latest
     permissions:
-      issues: write
-      contents: write
       pull-requests: write
-      repository-projects: write
     steps:
       - uses: actions/checkout@v4
       - name: Get modified files
@@ -61,7 +58,7 @@ jobs:
         uses: MongoCaleb/pr-description-action@4bdfe35b98f64532b419ad20b350a92546cd3aa1
         with:
           regex: "- \\[ \\] Did you add redirects\\?.*"
-          appendContentOnMatchOnly: true
+          appendContentOnMatchOnly: false
           regexFlags: is
           content: "- [ ] Did you add redirects?\n *Suggested redirects for moved/deleted files (replace &lt;v&gt; with earliest backport target version):*\n${{ steps.renamed-files.outputs.redirects }}${{ steps.deleted-files.outputs.redirects }}\n"
           token: ${{ secrets.GITHUB_TOKEN }}
