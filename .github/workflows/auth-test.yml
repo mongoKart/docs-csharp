@@ -52,7 +52,7 @@ jobs:
             old=$(echo "$file" | cut -d',' -f1)
             old="${old#source}"
             old="${old%.txt}/"
-            deleted_redirects+="[\*-master]: \$\{prefix\}/\$\{version\}$old -> \$\{base\}/\$\{version\}\\n"
+            deleted_redirects+="[\\*-master]: \$\{prefix\}/\$\{version\}$old -> \$\{base\}/\$\{version\}\"
           done
           echo "${deleted_redirects}"
       - name: Update the PR Description
