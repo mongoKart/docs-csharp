@@ -19,7 +19,6 @@ jobs:
         with:
           include_all_old_new_renamed_files: true
           files: |
-            source/**
             **.txt
       - name: Parse renamed files
         id: renamed-files
