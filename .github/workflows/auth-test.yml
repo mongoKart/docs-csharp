@@ -35,11 +35,12 @@ jobs:
             new=$(echo "$file" | cut -d',' -f2)
             new="${new#source}"
             new="${new%.txt}"
-            renamed_redirects+='<li>[*-master]: ${prefix}/${version}'"$old"'/ -> ${base}/${version}'"$new"'/</li>'
+            #single quotes = ${var} rendered literally; double quotes = $var interpreted
+            renamed_redirects+="\n- [ ] Did you add redirects for renamed files?\n<li>[*-master]: ${prefix}/${version}'"$old"'/ -> ${base}/${version}'"$new"'/</li>'
           done
           echo "redirects=${renamed_redirects}" >> "$GITHUB_OUTPUT"
       - name: Update the PR Description
         uses: MongoCaleb/pr-description-action@master
         with:
-          content: "\n- [ ] Did you add redirects for renamed files?\n${{ steps.renamed-files.outputs.redirects }}\n- [ ] Did you add redirects for deleted files?"
+          content: "${{ steps.renamed-files.outputs.redirects }}\n- [ ] Did you add redirects for deleted files?"
           token: ${{ secrets.GITHUB_TOKEN }}
