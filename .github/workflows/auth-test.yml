@@ -58,5 +58,5 @@ jobs:
       - name: Update the PR Description
         uses: MongoCaleb/pr-description-action@master
         with:
-          content: "- [ ] Did you add the following redirects?\n${{ steps.renamed-files.outputs.redirects }}"
+          content: "\n- [ ] Did you add the following redirects?\n${{ steps.renamed-files.outputs.redirects }}"
           token: ${{ secrets.GITHUB_TOKEN }}
