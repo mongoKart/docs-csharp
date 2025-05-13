@@ -25,7 +25,10 @@ jobs:
         env:
           RENAMED_FILES: ${{ steps.changed-files.outputs.all_old_new_renamed_files }}
         run: |
-          echo $RENAMED_FILES
+          echo "pwd:"
+          pwd
+          echo "ls:"
+          ls -al
           renamed_redirects=""
           for file in $RENAMED_FILES; do
             old=$(echo "$file" | cut -d',' -f1)
