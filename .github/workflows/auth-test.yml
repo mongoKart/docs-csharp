@@ -37,7 +37,7 @@ jobs:
             new="${new%.txt}"
             renamed_redirects+="<li>[\\*-master]: \$\{prefix\}/\$\{version\}$old/ -> \$\{base\}/\$\{version\}$new/</li>"
           done
-          renamed_redirects+="</ul>
+          renamed_redirects+="</ul>"
           echo "redirects=${renamed_redirects}" >> "$GITHUB_OUTPUT"
       - name: Update the PR Description
         uses: MongoCaleb/pr-description-action@master
