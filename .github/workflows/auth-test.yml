@@ -8,7 +8,8 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check Out Code
+        uses: actions/checkout@v4
       - name: Get Changed Files
         id: changed-files
         uses: tj-actions/changed-files@c65cd883420fd2eb864698a825fc4162dd94482c
@@ -59,5 +60,5 @@ jobs:
           regex: "- \\[ \\] Did you add redirects\\?.*"
           appendContentOnMatchOnly: false
           regexFlags: is
-          content: "\n- [ ] Did you add redirects?\n *Suggested redirects for moved/deleted files (replace &lt;v&gt; with earliest backport target version):*\n${{ steps.renamed-files.outputs.redirects }}${{ steps.deleted-files.outputs.redirects }}\n"
+          content: "- [ ] Did you add redirects?\n *Suggested redirects for moved/deleted files (replace &lt;v&gt; with earliest backport target version):*\n${{ steps.renamed-files.outputs.redirects }}${{ steps.deleted-files.outputs.redirects }}\n"
           token: ${{ secrets.GITHUB_TOKEN }}
