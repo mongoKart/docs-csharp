@@ -94,14 +94,14 @@ jobs:
         run: |
           # empty string that stays empty if there are no redirects to suggest
           redirect_html=""
+          echo "RENAMED_REDIRECTS: $RENAMED_REDIRECTS"
+          echo "renamed output: ${{ steps.renamed-files.outputs.redirects }}"
           
           for renamed_redirect in "${RENAMED_REDIRECTS[@]}"; do
-            echo "renamed: $renamed_direct"
             redirect_html+="<li>[&lt;v&gt;-*]: $renamed_redirect</li>"
           done
           
           for deleted_redirect in "${DELETED_REDIRECTS[@]}"; do
-            echo "deleted: $renamed_direct"
             redirect_html+="<li>[&lt;v&gt;-*]: $deleted_redirect</li>"
           done
           
