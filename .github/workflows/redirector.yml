@@ -92,19 +92,20 @@ jobs:
           RENAMED_REDIRECTS: ${{ steps.renamed-files.outputs.redirects }}
           DELETED_REDIRECTS: ${{ steps.deleted-files.outputs.redirects }}
         run: |
-
           # empty string that stays empty if there are no redirects to suggest
           redirect_html=""
           
           for renamed_redirect in "${RENAMED_REDIRECTS[@]}"; do
             redirect_html+="<li>[&lt;v&gt;-*]: $renamed_redirect</li>"
-            
+          done
+          
           for deleted_redirect in "${DELETED_REDIRECTS[@]}"; do
             redirect_html+="<li>[&lt;v&gt;-*]: $deleted_redirect</li>"
-            
+          done
+          
           echo "redirect_html=${redirect_html}" >> "$GITHUB_OUTPUT"
           
-      - name: Update PR Description
+      - name: Update `PR Description
         if: steps.build-redirect-html.outputs.redirect_html
         uses: MongoCaleb/pr-description-action@4bdfe35b98f64532b419ad20b350a92546cd3aa1
         env:
