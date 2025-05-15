@@ -119,11 +119,13 @@ jobs:
           # Specify the file to check  
           file="$REDIRECTS_FILE"
           
-          if [[ ! -f "$file" ]]; then  
+          if [[ -f "$file" ]]; then  
             duplicates=$(sort "$file" | uniq -d)  
             if [[ -n "$duplicates" ]]; then  
               echo "Duplicate lines found in $file:"  
               echo "$duplicates"  
-              exit 1 # Fail
-            fi  
+              exit 1 # error
+            fi
+          else  
+            echo "File $file does not exist. Skipping duplicate check."  
           fi  
