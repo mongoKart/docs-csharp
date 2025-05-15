@@ -96,10 +96,12 @@ jobs:
           redirect_html=""
           
           for renamed_redirect in "${RENAMED_REDIRECTS[@]}"; do
+            echo "renamed: $renamed_direct"
             redirect_html+="<li>[&lt;v&gt;-*]: $renamed_redirect</li>"
           done
           
           for deleted_redirect in "${DELETED_REDIRECTS[@]}"; do
+            echo "deleted: $renamed_direct"
             redirect_html+="<li>[&lt;v&gt;-*]: $deleted_redirect</li>"
           done
           
