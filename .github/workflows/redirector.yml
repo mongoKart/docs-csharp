@@ -105,7 +105,7 @@ jobs:
           
           echo "redirect_html=${redirect_html}" >> "$GITHUB_OUTPUT"
           
-      - name: Update `PR Description
+      - name: Update PR Description
         if: steps.build-redirect-html.outputs.redirect_html
         uses: MongoCaleb/pr-description-action@4bdfe35b98f64532b419ad20b350a92546cd3aa1
         env:
