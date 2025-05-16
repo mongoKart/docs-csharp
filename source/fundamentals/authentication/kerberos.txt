@@ -56,7 +56,7 @@ see the corresponding syntax:
       .. code-block:: csharp
 
          var mongoClient = new MongoClient(
-            "mongodb://<username>:<password>@<hostname>[:<port>]/?authMechanism=GSSAPI");
+            "mongodb://realUsername:realPassword@<hostname>[:<port>]/?authMechanism=GSSAPI");
 
    .. tab:: MongoCredential
       :tabid: mongo-credential
